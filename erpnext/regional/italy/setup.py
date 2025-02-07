@@ -402,6 +402,78 @@ def make_custom_fields(update=True):
 				insert_after="state",
 				print_hide=1,
 			),
+			dict(
+				fieldname="tax_id",
+				label="Tax Id",
+				fieldtype="Data",
+				insert_after="tax_category",
+				print_hide=1,
+			),
+			dict(
+				fieldname="fiscal_code",
+				label="Fiscal Code",
+				fieldtype="Data",
+				insert_after="tax_id",
+				print_hide=1,
+			),
+			dict(
+				fieldname="recipient_code",
+				label="Recipient Code",
+				fieldtype="Data",
+				insert_after="fiscal_code",
+				print_hide=1,
+				default="0000000",
+			),
+			dict(
+				fieldname="pec",
+				label="Recipient PEC",
+				fieldtype="Data",
+				insert_after="fiscal_code",
+				print_hide=1,
+			),
+			dict(
+				fieldname="type",
+				label="Type",
+				fieldtype="Select",
+				insert_after="address_type",
+				mandatory=1,
+				options="\nCompany\nIndividual",
+			),
+			dict(
+				fieldname="type",
+				label="Type",
+				fieldtype="Select",
+				insert_after="address_type",
+				options="\nCompany\nIndividual",
+				default="Company" 
+			),
+
+			dict(
+				fieldname="is_public_administration",
+				label="Is Public Administration",
+				fieldtype="Check",
+				insert_after="disabled",
+				print_hide=1,
+				description=_("Set this if the address is a Public Administration company."),
+				depends_on='eval:doc.type=="Company"',
+			),
+			dict(
+				fieldname="first_name",
+				label="First Name",
+				fieldtype="Data",
+				insert_after="address_title",
+				print_hide=1,
+				depends_on='eval:doc.type!="Company"',
+			),
+			dict(
+				fieldname="last_name",
+				label="Last Name",
+				fieldtype="Data",
+				insert_after="first_name",
+				print_hide=1,
+				depends_on='eval:doc.type!="Company"',
+			),
+
 		],
 		"Purchase Invoice": [
 			dict(

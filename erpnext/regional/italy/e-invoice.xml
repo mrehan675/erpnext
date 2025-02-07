@@ -51,7 +51,8 @@
       </IdTrasmittente>
       <ProgressivoInvio>{{ doc.progressive_number }}</ProgressivoInvio>
       <FormatoTrasmissione>{{ doc.transmission_format_code }}</FormatoTrasmissione>
-      <CodiceDestinatario>{{ doc.customer_data.recipient_code }}</CodiceDestinatario>
+      <CodiceDestinatario>{{ doc.customer_address_data.recipient_code if doc.customer_address_data.recipient_code else doc.customer_data.recipient_code }}</CodiceDestinatario>
+      <PECDestinatario>{{ doc.customer_address_data.pec if doc.customer_address_data.pec else doc.customer_data.pec }}</PECDestinatario>
       {% if doc.company_data.phone or doc.company_data.email -%}
       <ContattiTrasmittente>
         {% if doc.company_data.phone -%}<Telefono>{{ doc.company_data.phone }}</Telefono>{%- endif %}
@@ -92,26 +93,47 @@
       </IscrizioneREA>
       {%- endif %}
     </CedentePrestatore>
-    <CessionarioCommittente>
+    <CessionarioCommittente>    
       <DatiAnagrafici>
-        {%- if doc.customer_data.customer_type == "Individual" %}
-          <CodiceFiscale>{{ doc.customer_data.fiscal_code }}</CodiceFiscale>
-          <Anagrafica>
-            <Nome>{{ doc.customer_data.first_name }}</Nome>
-            <Cognome>{{ doc.customer_data.last_name }}</Cognome>
-          </Anagrafica>
-        {%- else %}
-          <IdFiscaleIVA>
-            <IdPaese>{{ doc.customer_address_data.country_code }}</IdPaese>
-            <IdCodice>{{ doc.tax_id | replace("IT","") }}</IdCodice>
-          </IdFiscaleIVA>
-          {%- if doc.customer_data.fiscal_code %}
-          <CodiceFiscale>{{ doc.customer_data.fiscal_code }}</CodiceFiscale>
+        {%- if doc.customer_address_data.type %}
+          {%- if doc.customer_address_data.type == "Individual" %}
+            <CodiceFiscale>{{ doc.customer_address_data.fiscal_code }}</CodiceFiscale>
+            <Anagrafica>
+              <Nome>{{ doc.customer_address_data.first_name }}</Nome>
+              <Cognome>{{ doc.customer_address_data.last_name }}</Cognome>
+            </Anagrafica>
+          {%- else %}
+            <IdFiscaleIVA>
+              <IdPaese>{{ doc.customer_address_data.country_code }}</IdPaese>
+              <IdCodice>{{ doc.customer_address_data.tax_id | replace("IT","") }}</IdCodice>
+            </IdFiscaleIVA>
+            {%- if doc.customer_address_data.fiscal_code %}
+            <CodiceFiscale>{{ doc.customer_address_data.fiscal_code }}</CodiceFiscale>
+            {%- endif %}
+            <Anagrafica>
+              <Denominazione>{{ doc.customer_name }}</Denominazione>
+            </Anagrafica>
           {%- endif %}
-          <Anagrafica>
-            <Denominazione>{{ doc.customer_name }}</Denominazione>
-          </Anagrafica>
-        {%- endif %}
+        {%- else %}
+          {%- if doc.customer_data.customer_type == "Individual" %}
+            <CodiceFiscale>{{ doc.customer_data.fiscal_code }}</CodiceFiscale>
+            <Anagrafica>
+              <Nome>{{ doc.customer_data.first_name }}</Nome>
+              <Cognome>{{ doc.customer_data.last_name }}</Cognome>
+            </Anagrafica>
+          {%- else %}
+            <IdFiscaleIVA>
+              <IdPaese>{{ doc.customer_address_data.country_code }}</IdPaese>
+              <IdCodice>{{ doc.tax_id | replace("IT","") }}</IdCodice>
+            </IdFiscaleIVA>
+            {%- if doc.customer_data.fiscal_code %}
+            <CodiceFiscale>{{ doc.customer_data.fiscal_code }}</CodiceFiscale>
+            {%- endif %}
+            <Anagrafica>
+              <Denominazione>{{ doc.customer_name }}</Denominazione>
+            </Anagrafica>
+          {%- endif %}
+        {%- endif %}  
       </DatiAnagrafici>
       {%- if doc.customer_address_data %}
       <Sede>
@@ -188,9 +210,8 @@
         <Descrizione>{{ html2text(item.description or '') or item.item_name }}</Descrizione>
         <Quantita>{{ format_float(item.qty) }}</Quantita>
         <UnitaMisura>{{ item.stock_uom }}</UnitaMisura>
-        <PrezzoUnitario>{{ format_float(item.price_list_rate or item.rate, item_meta.get_field("rate").precision) }}</PrezzoUnitario>
-        {{ render_discount_or_margin(item) }}
-        <PrezzoTotale>{{ format_float(item.amount, item_meta.get_field("amount").precision) }}</PrezzoTotale>
+        <PrezzoUnitario>{{ format_float(item.net_rate or item.price_list_rate or item.rate, item_meta.get_field("rate").precision) }}</PrezzoUnitario>
+        <PrezzoTotale>{{ format_float(item.net_amount, item_meta.get_field("amount").precision) }}</PrezzoTotale>
         <AliquotaIVA>{{ format_float(item.tax_rate, item_meta.get_field("tax_rate").precision) }}</AliquotaIVA>
         {%- if item.tax_exemption_reason %}
         <Natura>{{ item.tax_exemption_reason.split("-")[0] }}</Natura>

@@ -73,10 +73,15 @@ def prepare_invoice(invoice, progressive_number):
 	if invoice.shipping_address_name:
 		invoice.shipping_address_data = frappe.get_doc("Address", invoice.shipping_address_name)
 
-	if invoice.customer_data.is_public_administration:
+	if invoice.customer_address_data and invoice.customer_address_data.is_public_administration:
 		invoice.transmission_format_code = "FPA12"
+        
+	elif invoice.customer_data and invoice.customer_data.is_public_administration:
+		invoice.transmission_format_code = "FPA12"
+      
 	else:
 		invoice.transmission_format_code = "FPR12"
+
 
 	invoice.e_invoice_items = [item for item in invoice.items]
 	tax_data = get_invoice_summary(invoice.e_invoice_items, invoice.taxes)
